@@ -1,242 +1,73 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>KIRAN BM — Schedule Planner</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Schedule Planner — Agent / Agency / LOB (editable) </title>
 <style>
-  :root {
-    --bg: #0f172a;
-    --card: rgba(30,41,59,0.6);
-    --card-solid: #1e293b;
-    --border: rgba(51,65,85,0.6);
-    --border-strong: #334155;
-    --text: #f1f5f9;
-    --text-dim: #94a3b8;
-    --text-faint: #64748b;
-    --sky: #38bdf8;
-    --rose: #f43f5e;
-    --emerald: #34d399;
+  :root{
+    --bg:#0f172a; --card:rgba(30,41,59,0.6); --card-solid:#1e293b;
+    --border:rgba(51,65,85,0.6); --border-strong:#334155; --text:#f1f5f9;
+    --text-dim:#94a3b8; --text-faint:#64748b; --sky:#38bdf8; --rose:#f43f5e;
+    --slot-w:16px;
+    --c-phone:#3b82f6; --c-chat:#22c55e; --c-email:#f97316; --c-meeting:#a855f7;
+    --c-training:#6366f1; --c-tl:#ec4899; --c-qa:#14b8a6; --c-break:#22d3ee;
+    --c-lunch:#eab308; --c-bio:#fb7185; --c-pending:#94a3b8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:1.25rem}
+  .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+  .page-header h1{font-size:1.1rem;margin:0}
+  .page-header p{margin:0.15rem 0 0;font-size:0.72rem;color:var(--text-faint)}
+  .icon-btn{background:var(--card-solid);border:1px solid var(--border);color:var(--text-dim);border-radius:0.5rem;padding:0.45rem 0.7rem;cursor:pointer;display:inline-flex;align-items:center;gap:0.35rem;font-size:0.72rem}
+  .icon-btn:hover{background:#334155;color:#fff}
 
-    --c-phone: #3b82f6;
-    --c-chat: #22c55e;
-    --c-email: #f97316;
-    --c-meeting: #a855f7;
-    --c-training: #6366f1;
-    --c-tl: #ec4899;
-    --c-qa: #14b8a6;
-    --c-break: #22d3ee;
-    --c-lunch: #eab308;
-    --c-bio: #fb7185;
-    --c-pending: #94a3b8;
+  .toolbar{background:var(--card);border:1px solid var(--border);border-radius:0.75rem;padding:0.65rem;margin-bottom:1rem;display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem}
+  .search-box{display:flex;align-items:center;gap:0.4rem;background:var(--bg);border:1px solid var(--border-strong);border-radius:0.5rem;padding:0.35rem 0.6rem}
+  .search-box input{background:transparent;border:0;outline:0;color:var(--text);font-size:0.72rem;width:220px}
+  .date-nav{display:flex;align-items:center;gap:0.2rem;margin-left:auto}
+  .view-toggle{display:flex;background:var(--bg);border:1px solid var(--border-strong);border-radius:0.5rem;overflow:hidden;font-size:0.72rem}
+  .view-toggle button{background:none;border:0;color:var(--text-dim);padding:0.4rem 0.75rem;cursor:pointer}
+  .view-toggle button.active{background:var(--rose);color:#fff}
 
-    --slot-w: 16px;
-  }
+  .staffing-toggle{display:flex;align-items:center;gap:0.35rem;font-size:0.72rem;color:#e2e8f0}
+  .staffing-toggle input{accent-color:var(--sky)}
 
-  * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    padding: 1.25rem;
-  }
-
-  .page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-  }
-  .page-header h1 { font-size: 1.1rem; font-weight: 600; color: #fff; margin: 0; }
-  .page-header p { margin: 0.15rem 0 0; font-size: 0.72rem; color: var(--text-faint); }
-
-  .icon-btn {
-    background: var(--card-solid);
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-    border-radius: 0.5rem;
-    padding: 0.45rem 0.7rem;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    font-size: 0.72rem;
-    transition: background 0.15s;
-  }
-  .icon-btn:hover { background: #334155; }
-
-  /* Toolbar */
-  .toolbar {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 0.75rem;
-    padding: 0.65rem;
-    margin-bottom: 1rem;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .search-box {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    background: var(--bg);
-    border: 1px solid var(--border-strong);
-    border-radius: 0.5rem;
-    padding: 0.35rem 0.6rem;
-  }
-  .search-box svg { flex-shrink: 0; color: var(--text-faint); }
-  .search-box input {
-    background: transparent;
-    border: none;
-    outline: none;
-    color: var(--text);
-    font-size: 0.72rem;
-    width: 160px;
-  }
-  .search-box input::placeholder { color: var(--text-faint); }
-
-  .date-nav { display: flex; align-items: center; gap: 0.2rem; margin-left: auto; }
-  .date-nav button {
-    background: none; border: none; color: var(--text-dim);
-    cursor: pointer; padding: 0.3rem; border-radius: 0.4rem; display: inline-flex;
-  }
-  .date-nav button:hover { background: #334155; }
-  .date-nav span { font-family: ui-monospace, monospace; font-size: 0.72rem; color: #e2e8f0; padding: 0 0.4rem; }
-
-  .view-toggle {
-    display: flex; background: var(--bg); border: 1px solid var(--border-strong);
-    border-radius: 0.5rem; overflow: hidden; font-size: 0.72rem; font-weight: 500;
-  }
-  .view-toggle button {
-    background: none; border: none; color: var(--text-dim);
-    padding: 0.4rem 0.75rem; cursor: pointer; transition: background 0.15s, color 0.15s;
-  }
-  .view-toggle button:hover { background: #1e293b; }
-  .view-toggle button.active { background: var(--rose); color: #fff; }
-
-  .staffing-toggle {
-    display: flex; align-items: center; gap: 0.35rem;
-    font-size: 0.72rem; color: #e2e8f0; cursor: pointer; user-select: none;
-  }
-  .staffing-toggle input { accent-color: var(--sky); }
-
-  .pagination {
-    display: flex; align-items: center; gap: 0.5rem; margin-left: 0.5rem; color: var(--text-dim);
-    font-size: 0.72rem;
-  }
-  .pagination select, .pagination button {
-    background: var(--card-solid); border: 1px solid var(--border); color: var(--text-dim);
-    border-radius: 0.4rem; padding: 0.25rem 0.5rem; cursor: pointer;
-  }
-  .pagination button:hover { background: #334155; color: #fff; }
-
-  /* Palette */
-  .palette {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 0.75rem; padding: 0.75rem; margin-bottom: 1rem;
-  }
-  .palette-title {
-    font-size: 0.68rem; font-weight: 600; color: var(--text-dim);
-    text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.6rem;
-  }
-  .palette-items { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-  .palette-item {
-    display: flex; align-items: center; gap: 0.45rem;
-    background: var(--card-solid); border: 1px solid var(--border);
-    border-radius: 0.5rem; padding: 0.4rem 0.65rem 0.4rem 0.4rem;
-    cursor: grab; user-select: none; transition: transform 0.1s, border-color 0.15s;
-  }
-  .palette-item:hover { border-color: var(--border-strong); }
-  .palette-item:active { cursor: grabbing; transform: scale(0.97); }
-  .palette-item.dragging { opacity: 0.4; }
-  .palette-icon {
-    width: 1.6rem; height: 1.6rem; border-radius: 0.4rem;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  }
-  .palette-icon svg { width: 14px; height: 14px; stroke: #fff; }
-  .palette-label { font-size: 0.72rem; color: #e2e8f0; white-space: nowrap; }
-  .palette-hint { font-size: 0.66rem; color: var(--text-faint); margin-top: 0.5rem; }
-
-  /* Grid */
-  .grid-card { background: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; overflow: hidden; }
-  .grid-scroll { overflow: auto; max-height: 72vh; }
-  .grid-inner { min-width: calc(7.5rem + 96 * var(--slot-w)); }
-
-  .row { display: flex; border-bottom: 1px solid #1e293b; }
-  .row:hover .agent-track { background: rgba(51,65,85,0.15); }
-
-  .name-col {
-    width: 14rem; flex-shrink: 0; padding: 0 0.75rem;
-    border-right: 1px solid var(--border); display: flex; align-items: center; gap:0.6rem;
-    position: sticky; left: 0; background: #101c33; z-index: 2;
-  }
-
-  .name-col .meta-grid {
-    display: flex; gap: 0.45rem; align-items: center; width: 100%;
-  }
-  .meta-item { display:flex; flex-direction:column; gap:0.12rem; }
-  .meta-label { font-size: 0.56rem; color: var(--text-faint); text-transform:uppercase; letter-spacing: 0.04em; }
-  .meta-value {
-    font-size: 0.72rem; color: #e2e8f0; background: transparent; border-radius: 0.35rem;
-    padding: 0.18rem 0.35rem; min-width: 3.4rem;
-  }
-  .meta-value[contenteditable="true"] { outline: none; border: 1px dashed rgba(255,255,255,0.03); cursor:text; }
-
-  .timeline-header {
-    display: flex; border-bottom: 1px solid var(--border); background: #0c1526;
-    position: sticky; top: 0; z-index: 6;
-  }
-  .timeline-header .name-col {
-    font-size: 0.66rem; font-weight: 600; color: var(--text-dim);
-    text-transform: uppercase; letter-spacing: 0.05em; z-index: 7; background: #0c1526;
-  }
-  .timeline-header-track { position: relative; width: calc(96 * var(--slot-w)); height: 1.9rem; flex-shrink: 0; }
-  .hour-label {
-    position: absolute; top: 0; height: 100%; font-size: 0.6rem;
-    font-family: ui-monospace, monospace; color: var(--text-faint);
-    border-left: 1px solid #1e293b; padding: 0.35rem 0 0 0.2rem;
-  }
-
-  .staffing-row { background: rgba(15,23,42,0.3); }
-  .staffing-row .name-col { font-size: 0.64rem; color: var(--text-faint); background: #101c33; }
-  .staffing-track {
-    position: relative; width: calc(96 * var(--slot-w)); height: 2.2rem;
-    display: flex; align-items: flex-end; flex-shrink: 0;
-  }
-  .staffing-bar { width: calc(var(--slot-w) - 1px); background: rgba(56,189,248,0.5); margin-right: 1px; border-radius: 1px 1px 0 0; }
-
-  .agent-id { font-size: 0.68rem; font-family: ui-monospace, monospace; color: #cbd5e1; }
-
-  .agent-track {
-    position: relative; width: calc(96 * var(--slot-w)); height: 2rem; flex-shrink: 0;
-    background-image: repeating-linear-gradient(
-      to right, #17233b 0, #17233b 1px, transparent 1px, transparent calc(var(--slot-w) * 4)
-    );
-    background-size: calc(var(--slot-w) * 4) 100%;
-  }
-
-  .segment {
-    position: absolute; top: 50%; transform: translateY(-50%);
-    height: 1.45rem; border-radius: 0.2rem; cursor: pointer;
-    box-shadow: 0 0 0 1px rgba(0,0,0,0.25) inset;
-  }
-  .segment:hover { filter: brightness(1.25); }
-
-  .drop-hint { position: absolute; inset: 0; pointer-events: none; background: rgba(56,189,248,0.08); display: none; }
-  .agent-track.drag-over .drop-hint { display: block; }
-
-  .no-results { text-align: center; font-size: 0.85rem; color: var(--text-faint); padding: 2.5rem 0; }
-  .footer-note { margin-top: 0.75rem; font-size: 0.68rem; color: var(--text-faint); }
-
-  /* small screens */
-  @media (max-width: 900px) {
-    .name-col { width: 12rem; }
-  }
+  .pagination{display:flex;align-items:center;gap:0.5rem;margin-left:0.5rem;color:var(--text-dim);font-size:0.72rem}
+  .palette{background:var(--card);border:1px solid var(--border);border-radius:0.75rem;padding:0.75rem;margin-bottom:1rem}
+  .palette-title{font-size:0.68rem;font-weight:600;color:var(--text-dim);text-transform:uppercase;margin-bottom:0.6rem}
+  .palette-items{display:flex;flex-wrap:wrap;gap:0.5rem}
+  .palette-item{display:flex;align-items:center;gap:0.45rem;background:var(--card-solid);border:1px solid var(--border);border-radius:0.5rem;padding:0.4rem 0.65rem 0.4rem 0.4rem;cursor:grab;user-select:none}
+  .palette-item:active{cursor:grabbing;transform:scale(0.98)}
+  .palette-icon{width:1.6rem;height:1.6rem;border-radius:0.4rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .palette-label{font-size:0.72rem;color:#e2e8f0;white-space:nowrap}
+  .grid-card{background:var(--card);border:1px solid var(--border);border-radius:0.75rem;overflow:hidden}
+  .grid-scroll{overflow:auto;max-height:72vh}
+  .grid-inner{min-width:calc(7.5rem + 96 * var(--slot-w))}
+  .row{display:flex;border-bottom:1px solid #1e293b}
+  .name-col{width:14rem;flex-shrink:0;padding:0 0.75rem;border-right:1px solid var(--border);display:flex;align-items:center;gap:0.6rem;position:sticky;left:0;background:#101c33;z-index:2}
+  .meta-grid{display:flex;gap:0.45rem;align-items:center;width:100%}
+  .meta-item{display:flex;flex-direction:column;gap:0.12rem}
+  .meta-label{font-size:0.56rem;color:var(--text-faint);text-transform:uppercase}
+  .meta-value{font-size:0.72rem;color:#e2e8f0;background:transparent;border-radius:0.35rem;padding:0.18rem 0.35rem;min-width:3.4rem}
+  .meta-value[contenteditable="true"]{outline:none;border:1px dashed rgba(255,255,255,0.03);cursor:text}
+  .timeline-header{display:flex;border-bottom:1px solid var(--border);background:#0c1526;position:sticky;top:0;z-index:6}
+  .timeline-header .name-col{font-size:0.66rem;font-weight:600;color:var(--text-dim);text-transform:uppercase}
+  .timeline-header-track{position:relative;width:calc(96 * var(--slot-w));height:1.9rem;flex-shrink:0}
+  .hour-label{position:absolute;top:0;height:100%;font-size:0.6rem;font-family:ui-monospace,monospace;color:var(--text-faint);border-left:1px solid #1e293b;padding:0.35rem 0 0 0.2rem}
+  .staffing-row{background:rgba(15,23,42,0.3)}
+  .staffing-track{position:relative;width:calc(96 * var(--slot-w));height:2.2rem;display:flex;align-items:flex-end;flex-shrink:0}
+  .staffing-bar{width:calc(var(--slot-w) - 1px);background:rgba(56,189,248,0.5);margin-right:1px;border-radius:1px 1px 0 0}
+  .agent-id{font-size:0.68rem;font-family:ui-monospace,monospace;color:#cbd5e1}
+  .agent-track{position:relative;width:calc(96 * var(--slot-w));height:2rem;flex-shrink:0;background-image:repeating-linear-gradient(to right,#17233b 0,#17233b 1px,transparent 1px,transparent calc(var(--slot-w) * 4));background-size:calc(var(--slot-w) * 4) 100%}
+  .seg-layer{position:absolute;inset:0}
+  .segment{position:absolute;top:50%;transform:translateY(-50%);height:1.45rem;border-radius:0.2rem;cursor:pointer;box-shadow:0 0 0 1px rgba(0,0,0,0.25) inset}
+  .segment:hover{filter:brightness(1.15)}
+  .drop-hint{position:absolute;inset:0;pointer-events:none;background:rgba(56,189,248,0.08);display:none}
+  .agent-track.drag-over .drop-hint{display:block}
+  .no-results{text-align:center;font-size:0.85rem;color:var(--text-faint);padding:2.5rem 0}
+  .footer-note{margin-top:0.75rem;font-size:0.68rem;color:var(--text-faint)}
+  @media (max-width:900px){.name-col{width:12rem}}
 </style>
 </head>
 <body>
@@ -244,30 +75,24 @@
   <div class="page-header">
     <div>
       <h1>Schedule Planner</h1>
-      <p>200 agents · 24-hour timeline · 15-minute granularity</p>
+      <p>200 agents · 24-hour timeline · 15-minute granularity — editable Agency/LOB · drag across to paint ranges</p>
     </div>
-    <div style="display:flex; gap:0.5rem;">
-      <button class="icon-btn" id="clearAllBtn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-        Clear All
-      </button>
-      <button class="icon-btn" id="downloadBtn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Export CSV
-      </button>
+    <div style="display:flex;gap:0.5rem">
+      <button class="icon-btn" id="clearAllBtn">Clear All</button>
+      <button class="icon-btn" id="downloadBtn">Export CSV</button>
     </div>
   </div>
 
   <div class="toolbar">
     <div class="search-box">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input id="searchInput" type="text" placeholder="Search agent / agency / lob...">
+      <input id="searchInput" placeholder="Search agent / agency / lob..." />
     </div>
 
     <div class="date-nav">
-      <button id="prevDate"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <button id="prevDate">◀</button>
       <span id="dateLabel"></span>
-      <button id="nextDate"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+      <button id="nextDate">▶</button>
     </div>
 
     <div class="view-toggle">
@@ -276,212 +101,179 @@
     </div>
 
     <label class="staffing-toggle">
-      <input type="checkbox" id="staffingToggle" checked>
-      Show staffing
+      <input type="checkbox" id="staffingToggle" checked /> Show staffing
     </label>
 
-    <div class="pagination" style="margin-left:8px;">
+    <div class="pagination" style="margin-left:8px">
       <label style="font-size:0.68rem;color:var(--text-faint)">Page size</label>
-      <select id="pageSizeSelect">
-        <option value="10">10</option>
-        <option value="25" selected>25</option>
-        <option value="50">50</option>
-      </select>
+      <select id="pageSizeSelect"><option value="10">10</option><option value="25" selected>25</option><option value="50">50</option></select>
       <button id="prevPageBtn">‹ Prev</button>
-      <span id="pageInfo" style="min-width:6rem; text-align:center;"></span>
+      <span id="pageInfo" style="min-width:6rem;text-align:center"></span>
       <button id="nextPageBtn">Next ›</button>
     </div>
-
   </div>
 
   <div class="palette">
-    <div class="palette-title">Activity Types — drag onto the timeline (snaps to 15-min slots)</div>
+    <div class="palette-title">Activity Types — click or drag an icon, then drag across a row to paint a range</div>
     <div class="palette-items" id="paletteItems"></div>
-    <div class="palette-hint">Drag an icon and drag across a row to paint multiple 15-minute slots at once. Click an existing block to remove it.</div>
+    <div class="palette-hint">Start by clicking (or pressing) an icon and dragging across the timeline for the desired agent; release to finalize. Click a block to remove it.</div>
   </div>
 
   <div class="grid-card">
-    <div class="grid-scroll" id="gridScroll">
-      <div class="grid-inner" id="gridInner"></div>
-    </div>
+    <div class="grid-scroll" id="gridScroll"><div class="grid-inner" id="gridInner"></div></div>
   </div>
 
-  <div class="footer-note">Tip: hold the mouse down while dragging an icon across a row to paint a continuous block; each cell is 15 minutes.</div>
+  <div class="footer-note">Tip: Palette click + drag paints ranges. Edits to Agency/LOB are saved locally in your browser.</div>
 
 <script>
-(function () {
+(() => {
   const SLOTS_PER_DAY = 96;
   const AGENT_COUNT = 200;
 
   const ACTIVITY_TYPES = {
-    phone:    { label: 'Phone / Voice',   color: 'var(--c-phone)',    icon: 'phone' },
-    chat:     { label: 'Chat',            color: 'var(--c-chat)',     icon: 'chat' },
-    email:    { label: 'Email / Tickets', color: 'var(--c-email)',    icon: 'mail' },
-    meeting:  { label: 'Meeting',         color: 'var(--c-meeting)',  icon: 'users' },
-    training: { label: 'Training',        color: 'var(--c-training)', icon: 'book' },
-    tl:       { label: 'TL Feedback',     color: 'var(--c-tl)',       icon: 'thumbsup' },
-    qa:       { label: 'QA Feedback',     color: 'var(--c-qa)',       icon: 'check' },
-    break:    { label: 'Break',           color: 'var(--c-break)',    icon: 'coffee' },
-    lunch:    { label: 'Lunch',           color: 'var(--c-lunch)',    icon: 'plate' },
-    bio:      { label: 'Bio Break',       color: 'var(--c-bio)',      icon: 'activity' },
-    pending:  { label: 'Break Pending',   color: 'var(--c-pending)',  icon: 'clock' },
+    phone: { label: 'Phone / Voice', color: 'var(--c-phone)', icon: 'phone' },
+    chat: { label: 'Chat', color: 'var(--c-chat)', icon: 'chat' },
+    email: { label: 'Email / Tickets', color: 'var(--c-email)', icon: 'mail' },
+    meeting: { label: 'Meeting', color: 'var(--c-meeting)', icon: 'users' },
+    training: { label: 'Training', color: 'var(--c-training)', icon: 'book' },
+    tl: { label: 'TL Feedback', color: 'var(--c-tl)', icon: 'thumbsup' },
+    qa: { label: 'QA Feedback', color: 'var(--c-qa)', icon: 'check' },
+    break: { label: 'Break', color: 'var(--c-break)', icon: 'coffee' },
+    lunch: { label: 'Lunch', color: 'var(--c-lunch)', icon: 'plate' },
+    bio: { label: 'Bio Break', color: 'var(--c-bio)', icon: 'activity' },
+    pending: { label: 'Break Pending', color: 'var(--c-pending)', icon: 'clock' }
   };
 
   const ICON_PATHS = {
-    phone: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>',
-    chat: '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
-    mail: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
-    users: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
-    book: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
-    thumbsup: '<path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>',
-    check: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
-    coffee: '<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4Z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>',
-    plate: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/>',
-    activity: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
-    clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+    phone:'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>',
+    chat:'<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
+    mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+    users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    book:'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+    thumbsup:'<path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>',
+    check:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+    coffee:'<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4Z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>',
+    plate:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/>',
+    activity:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+    clock:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'
   };
 
-  let viewMode = "Day";
+  // state
+  let viewMode = 'Day';
   let currentDate = new Date();
-  let currentDragType = null;
-  let dragLastRow = -1;
-  let dragLastSlot = -1;
-
   let currentPage = 1;
   let pageSize = 25;
-  let visibleAgentIndices = []; // filtered set of agent indices
-  let pageAgentIndices = []; // indices on current page
+  let visibleAgentIndices = [];
+  let pageAgentIndices = [];
 
-  const pad2 = (n) => String(n).padStart(2, '0');
-  const pad3 = (n) => String(n).padStart(3, '0');
+  const pad2 = n => String(n).padStart(2,'0');
+  const pad3 = n => String(n).padStart(3,'0');
+  const formatDate = d => d.getFullYear() + '/' + pad2(d.getMonth()+1) + '/' + pad2(d.getDate());
+  const slotToTime = slot => { const h = Math.floor(slot/4); const m = (slot%4)*15; return pad2(h) + ':' + pad2(m); };
+  const seededRandom = s => { const x = Math.sin(s)*10000; return x - Math.floor(x); };
 
-  const seededRandom = (seed) => {
-    const x = Math.sin(seed) * 10000;
-    return x - Math.floor(x);
-  };
-
-  const formatDate = (d) => d.getFullYear() + '/' + pad2(d.getMonth() + 1) + '/' + pad2(d.getDate());
-
-  const slotToTime = (slot) => {
-    const h = Math.floor(slot / 4);
-    const m = (slot % 4) * 15;
-    return pad2(h) + ':' + pad2(m);
-  };
-
-  function generateAgentData() {
+  // generate schedule matrix
+  function generateAgentData(){
     const data = [];
     const shiftLen = 32;
     const maxStart = SLOTS_PER_DAY - shiftLen;
-
-    for (let i = 0; i < AGENT_COUNT; i++) {
+    for(let i=0;i<AGENT_COUNT;i++){
       const slots = new Array(SLOTS_PER_DAY).fill(null);
       const startSlot = i % maxStart;
-
       let cursor = startSlot;
-      const push = (type, len) => {
-        for (let k = 0; k < len && cursor < SLOTS_PER_DAY; k++, cursor++) {
-          slots[cursor] = type;
-        }
-      };
-
+      const push = (type,len) => { for(let k=0;k<len && cursor < SLOTS_PER_DAY;k++,cursor++) slots[cursor]=type; };
       const variant = i % 5;
-      push('phone', 7);
-      push(variant === 3 ? 'bio' : 'break', 1);
-      push('phone', 6);
-      push(variant === 1 ? 'tl' : 'chat', 4);
-      push('lunch', 2);
-      push('email', 3);
-      push(variant === 2 ? 'qa' : 'chat', 4);
-      push(variant === 0 ? 'training' : 'meeting', 2);
+      push('phone',7); push(variant===3?'bio':'break',1); push('phone',6);
+      push(variant===1?'tl':'chat',4); push('lunch',2); push('email',3);
+      push(variant===2?'qa':'chat',4); push(variant===0?'training':'meeting',2);
       const remaining = shiftLen - 7 - 1 - 6 - 4 - 2 - 3 - 4 - 2;
-      if (variant === 4) {
-        push('pending', 1);
-        push('phone', Math.max(0, remaining - 1));
-      } else {
-        push('phone', remaining);
-      }
-
+      if(variant===4){ push('pending',1); push('phone',Math.max(0,remaining-1)); }
+      else push('phone',remaining);
       data.push(slots);
     }
     return data;
   }
 
-  const agentData = generateAgentData();
+  let agentData = generateAgentData();
+  let agencyData = new Array(AGENT_COUNT);
+  let lobData = new Array(AGENT_COUNT);
+  for(let i=0;i<AGENT_COUNT;i++){ agencyData[i] = 'Agency ' + (1 + (i % 8)); lobData[i] = 'LOB ' + (1 + (i % 4)); }
 
-  // new arrays for Agency and LOB
-  const agencyData = new Array(AGENT_COUNT);
-  const lobData = new Array(AGENT_COUNT);
-  for (let i = 0; i < AGENT_COUNT; i++) {
-    agencyData[i] = 'Agency ' + (1 + (i % 8));
-    lobData[i] = 'LOB ' + (1 + (i % 4));
+  // DOM caches for rows in the current page
+  const rowTrackEls = [];
+  const rowNameEls = [];
+
+  // painting interaction variables
+  let isPainting = false;
+  let paintType = null;
+  let paintStartSlot = null;
+  let paintAgentGlobal = null;
+
+  // localStorage persistence
+  const STORAGE_KEY = 'schedule_planner_state_v1';
+  function saveState(){
+    try{
+      const payload = {
+        agentData,
+        agencyData,
+        lobData,
+        currentDate: currentDate.toISOString(),
+        pageSize,
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    }catch(e){ console.warn('save failed', e); }
+  }
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return;
+      const p = JSON.parse(raw);
+      if(p.agentData && Array.isArray(p.agentData) && p.agentData.length===AGENT_COUNT) agentData = p.agentData;
+      if(p.agencyData && Array.isArray(p.agencyData) && p.agencyData.length===AGENT_COUNT) agencyData = p.agencyData;
+      if(p.lobData && Array.isArray(p.lobData) && p.lobData.length===AGENT_COUNT) lobData = p.lobData;
+      if(p.currentDate) currentDate = new Date(p.currentDate);
+      if(p.pageSize) pageSize = p.pageSize;
+    }catch(e){ console.warn('load failed', e); }
   }
 
-  function mergeSegments(slots) {
+  // helpers for UI rendering
+  function svgIcon(key,size){ return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+ICON_PATHS[key]+'</svg>'; }
+
+  function mergeSegments(slots){
     const segs = [];
-    let i = 0;
-    while (i < slots.length) {
-      if (!slots[i]) { i++; continue; }
+    let i=0;
+    while(i<slots.length){
+      if(!slots[i]){ i++; continue; }
       const type = slots[i];
-      let j = i + 1;
-      while (j < slots.length && slots[j] === type) j++;
-      segs.push({ type, start: i, end: j });
-      i = j;
+      let j=i+1;
+      while(j<slots.length && slots[j]===type) j++;
+      segs.push({type,start:i,end:j});
+      i=j;
     }
     return segs;
   }
 
-  function computeStaffingCurve() {
+  function computeStaffingCurve(){
     const counts = new Array(SLOTS_PER_DAY).fill(0);
     agentData.forEach(slots => {
-      slots.forEach((type, s) => {
-        if (type && type !== 'break' && type !== 'lunch' && type !== 'bio' && type !== 'pending') {
-          counts[s]++;
-        }
-      });
+      slots.forEach((t,s) => { if(t && t!=='break' && t!=='lunch' && t!=='bio' && t!=='pending') counts[s]++; });
     });
     return counts;
   }
 
-  const rowTrackEls = []; // DOM track elements for current page rows
-  const rowNameEls = []; // DOM name columns for current page rows
-
-  function svgIcon(iconKey, size) {
-    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + ICON_PATHS[iconKey] + '</svg>';
+  // slot from clientX relative to track
+  function slotFromClientX(track,clientX){
+    const rect = track.getBoundingClientRect();
+    const pct = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    return Math.min(SLOTS_PER_DAY-1, Math.floor(pct * SLOTS_PER_DAY));
   }
 
-  function renderPalette() {
-    const container = document.getElementById('paletteItems');
-    container.innerHTML = '';
-    Object.entries(ACTIVITY_TYPES).forEach(([key, meta]) => {
-      const item = document.createElement('div');
-      item.className = 'palette-item';
-      item.draggable = true;
-      item.dataset.type = key;
-      item.innerHTML =
-        '<span class="palette-icon" style="background:' + meta.color + '">' + svgIcon(meta.icon, 14) + '</span>' +
-        '<span class="palette-label">' + meta.label + '</span>';
-
-      item.addEventListener('dragstart', (e) => {
-        currentDragType = key;
-        item.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'copy';
-        e.dataTransfer.setData('text/plain', key);
-      });
-      item.addEventListener('dragend', () => {
-        item.classList.remove('dragging');
-        currentDragType = null;
-        dragLastRow = -1;
-        dragLastSlot = -1;
-      });
-
-      container.appendChild(item);
-    });
-  }
-
-  function renderRowSegmentsGlobalIndex(globalIdx) {
-    const visibleIdx = findVisibleIndexInPage(globalIdx);
-    if (visibleIdx === -1) return; // not on current page, DOM not present
+  // render a single agent row segments using global index
+  function renderRowSegmentsGlobalIndex(globalIdx){
+    const visibleIdx = pageAgentIndices.indexOf(globalIdx);
+    if(visibleIdx === -1) return;
     const track = rowTrackEls[visibleIdx];
+    if(!track) return;
     const segLayer = track.querySelector('.seg-layer');
     segLayer.innerHTML = '';
     const segs = mergeSegments(agentData[globalIdx]);
@@ -493,69 +285,65 @@
       div.style.left = leftPct + '%';
       div.style.width = widthPct + '%';
       div.style.backgroundColor = ACTIVITY_TYPES[seg.type].color;
-      div.title = ACTIVITY_TYPES[seg.type].label + '  ' + slotToTime(seg.start) + '\u2013' + slotToTime(seg.end);
+      div.title = ACTIVITY_TYPES[seg.type].label + '  ' + slotToTime(seg.start) + ' – ' + slotToTime(seg.end);
       div.addEventListener('click', (e) => {
         e.stopPropagation();
-        for (let s = seg.start; s < seg.end; s++) agentData[globalIdx][s] = null;
+        for(let s = seg.start; s < seg.end; s++) agentData[globalIdx][s] = null;
         renderRowSegmentsGlobalIndex(globalIdx);
-        if (document.getElementById('staffingToggle').checked) renderStaffing();
+        if(document.getElementById('staffingToggle').checked) renderStaffing();
+        saveState();
       });
       segLayer.appendChild(div);
     });
   }
 
-  function slotFromClientX(track, clientX) {
-    const rect = track.getBoundingClientRect();
-    const pct = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
-    return Math.min(SLOTS_PER_DAY - 1, Math.floor(pct * SLOTS_PER_DAY));
+  // paint slots for an agent for a slot range
+  function paintRangeOnAgent(globalIdx, startSlot, endSlot, type){
+    const a = Math.max(0, Math.min(SLOTS_PER_DAY-1, startSlot));
+    const b = Math.max(0, Math.min(SLOTS_PER_DAY-1, endSlot));
+    const lo = Math.min(a,b), hi = Math.max(a,b);
+    for(let s=lo;s<=hi;s++) agentData[globalIdx][s] = type;
+    renderRowSegmentsGlobalIndex(globalIdx);
   }
 
-  function paintAtGlobal(agentGlobalIdx, slot, type) {
-    if (agentData[agentGlobalIdx][slot] === type) return;
-    agentData[agentGlobalIdx][slot] = type;
-    renderRowSegmentsGlobalIndex(agentGlobalIdx);
-  }
-
-  function buildHourLabels(container) {
-    for (let h = 0; h < 24; h++) {
+  // build hour labels
+  function buildHourLabels(container){
+    container.innerHTML = '';
+    for(let h=0;h<24;h++){
       const lbl = document.createElement('div');
       lbl.className = 'hour-label';
-      lbl.style.left = ((h * 4) / SLOTS_PER_DAY) * 100 + '%';
-      lbl.style.width = (4 / SLOTS_PER_DAY) * 100 + '%';
+      lbl.style.left = ((h*4)/SLOTS_PER_DAY)*100 + '%';
+      lbl.style.width = (4/SLOTS_PER_DAY)*100 + '%';
       lbl.textContent = pad2(h) + ':00';
       container.appendChild(lbl);
     }
   }
 
+  // staffing
   let staffingTrackEl = null;
-  function renderStaffing() {
-    if (!staffingTrackEl) return;
+  function renderStaffing(){
+    if(!staffingTrackEl) return;
     const curve = computeStaffingCurve();
     const max = Math.max(1, ...curve);
     staffingTrackEl.innerHTML = '';
     curve.forEach(count => {
       const bar = document.createElement('div');
       bar.className = 'staffing-bar';
-      bar.style.height = ((count / max) * 100) + '%';
+      bar.style.height = ((count/max) * 100) + '%';
       bar.title = count + ' agents active';
       staffingTrackEl.appendChild(bar);
     });
   }
 
-  function findVisibleIndexInPage(globalIdx) {
-    return pageAgentIndices.indexOf(globalIdx);
-  }
-
-  function buildGrid() {
-    // build using visibleAgentIndices and current page
+  // build grid with pagination and current filter
+  function buildGrid(){
     const container = document.getElementById('gridInner');
     container.innerHTML = '';
-    rowTrackEls.length = 0;
-    rowNameEls.length = 0;
+    rowTrackEls.length = 0; rowNameEls.length = 0;
 
     const header = document.createElement('div');
     header.className = 'timeline-header';
-    header.innerHTML = '<div class="name-col"><div class="meta-grid"><div style="min-width:4.5rem;" class="meta-item"><div class="meta-label">Agent</div><div class="meta-value">ID</div></div><div style="min-width:5.5rem;" class="meta-item"><div class="meta-label">Agency</div><div class="meta-value">Name</div></div><div style="min-width:4.5rem;" class="meta-item"><div class="meta-label">LOB</div><div class="meta-value">Name</div></div></div></div>';
+    header.innerHTML = '<div class="name-col"><div class="meta-grid"><div style="min-width:4.5rem" class="meta-item"><div class="meta-label">Agent</div><div class="meta-value">ID</div></div><div style="min-width:5.5rem" class="meta-item"><div class="meta-label">Agency</div><div class="meta-value">Name</div></div><div style="min-width:4.5rem" class="meta-item"><div class="meta-label">LOB</div><div class="meta-value">Name</div></div></div></div>';
     const headerTrack = document.createElement('div');
     headerTrack.className = 'timeline-header-track';
     buildHourLabels(headerTrack);
@@ -565,218 +353,320 @@
     const staffingRow = document.createElement('div');
     staffingRow.className = 'row staffing-row';
     staffingRow.id = 'staffingRow';
-    staffingRow.innerHTML = '<div class="name-col"><div class="meta-grid"><div style="min-width:4.5rem;" class="meta-item"><div class="meta-label">Staff</div><div class="meta-value">Curve</div></div><div style="min-width:5.5rem;" class="meta-item"></div><div style="min-width:4.5rem;" class="meta-item"></div></div></div>';
+    staffingRow.innerHTML = '<div class="name-col"><div class="meta-grid"><div style="min-width:4.5rem" class="meta-item"><div class="meta-label">Staff</div><div class="meta-value">Curve</div></div><div style="min-width:5.5rem" class="meta-item"></div><div style="min-width:4.5rem" class="meta-item"></div></div></div>';
     const strack = document.createElement('div');
     strack.className = 'staffing-track';
     staffingRow.appendChild(strack);
     container.appendChild(staffingRow);
     staffingTrackEl = strack;
 
-    // compute page slice
-    const start = (currentPage - 1) * pageSize;
+    // calculate current page slice
+    const start = (currentPage-1) * pageSize;
     const end = Math.min(start + pageSize, visibleAgentIndices.length);
     pageAgentIndices = visibleAgentIndices.slice(start, end);
 
-    for (let p = 0; p < pageAgentIndices.length; p++) {
-      const globalIdx = pageAgentIndices[p];
+    // for each visible agent on page, build row
+    pageAgentIndices.forEach((globalIdx, p) => {
       const row = document.createElement('div');
       row.className = 'row';
       row.dataset.agentIdxGlobal = globalIdx;
 
       const nameCol = document.createElement('div');
       nameCol.className = 'name-col';
-      // meta grid with Agent ID, Agency (editable), LOB (editable)
       nameCol.innerHTML =
         '<div class="meta-grid">' +
-          '<div style="min-width:4.5rem" class="meta-item"><div class="meta-label">Agent</div><div class="meta-value agent-id">Agent ' + pad3(globalIdx + 1) + '</div></div>' +
-          '<div style="min-width:5.5rem" class="meta-item"><div class="meta-label">Agency</div><div class="meta-value agency-value" contenteditable="true">' + escapeHtml(agencyData[globalIdx]) + '</div></div>' +
-          '<div style="min-width:4.5rem" class="meta-item"><div class="meta-label">LOB</div><div class="meta-value lob-value" contenteditable="true">' + escapeHtml(lobData[globalIdx]) + '</div></div>' +
+          '<div style="min-width:4.5rem" class="meta-item"><div class="meta-label">Agent</div><div class="meta-value agent-id">Agent ' + pad3(globalIdx+1) + '</div></div>' +
+          '<div style="min-width:5.5rem" class="meta-item"><div class="meta-label">Agency</div><div class="meta-value agency-value" contenteditable="true">' + escapeHtml(agencyData[globalIdx] || '') + '</div></div>' +
+          '<div style="min-width:4.5rem" class="meta-item"><div class="meta-label">LOB</div><div class="meta-value lob-value" contenteditable="true">' + escapeHtml(lobData[globalIdx] || '') + '</div></div>' +
         '</div>';
 
-      // attach listeners to editable fields
+      // attach contenteditable listeners
       setTimeout(() => {
         const agencyEl = nameCol.querySelector('.agency-value');
         const lobEl = nameCol.querySelector('.lob-value');
         agencyEl.addEventListener('input', () => {
           agencyData[globalIdx] = agencyEl.textContent.trim();
         });
-        agencyEl.addEventListener('blur', () => {
-          agencyData[globalIdx] = agencyEl.textContent.trim();
-        });
-        lobEl.addEventListener('input', () => {
-          lobData[globalIdx] = lobEl.textContent.trim();
-        });
-        lobEl.addEventListener('blur', () => {
-          lobData[globalIdx] = lobEl.textContent.trim();
-        });
-      }, 0);
+        agencyEl.addEventListener('blur', () => { agencyData[globalIdx] = agencyEl.textContent.trim(); saveState(); applyFilterAndRebuild(); });
+        lobEl.addEventListener('input', () => { lobData[globalIdx] = lobEl.textContent.trim(); });
+        lobEl.addEventListener('blur', () => { lobData[globalIdx] = lobEl.textContent.trim(); saveState(); applyFilterAndRebuild(); });
+      },0);
 
       row.appendChild(nameCol);
       rowNameEls.push(nameCol);
 
       const track = document.createElement('div');
       track.className = 'agent-track';
-      track.innerHTML = '<div class="seg-layer" style="position:absolute; inset:0;"></div><div class="drop-hint"></div>';
+      track.innerHTML = '<div class="seg-layer"></div><div class="drop-hint"></div>';
 
-      // drag/paste handlers (global index aware)
+      // dragover/drop support (html5)
       track.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'copy';
-        track.classList.add('drag-over');
-        if (!currentDragType) return;
+        e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; track.classList.add('drag-over');
+        const type = e.dataTransfer.getData('text/plain') || paintType;
+        if(!type) return;
         const slot = slotFromClientX(track, e.clientX);
-        if (dragLastRow === globalIdx && dragLastSlot === slot) return;
-        dragLastRow = globalIdx;
-        dragLastSlot = slot;
-        paintAtGlobal(globalIdx, slot, currentDragType);
+        // paint a single-slot preview during html5 dragover
+        paintRangeOnAgent(globalIdx, slot, slot, type);
       });
       track.addEventListener('dragleave', () => track.classList.remove('drag-over'));
       track.addEventListener('drop', (e) => {
-        e.preventDefault();
-        track.classList.remove('drag-over');
-        const type = currentDragType || e.dataTransfer.getData('text/plain');
-        if (!type) return;
+        e.preventDefault(); track.classList.remove('drag-over');
+        const type = e.dataTransfer.getData('text/plain') || paintType;
+        if(!type) return;
         const slot = slotFromClientX(track, e.clientX);
-        paintAtGlobal(globalIdx, slot, type);
-        if (document.getElementById('staffingToggle').checked) renderStaffing();
+        paintRangeOnAgent(globalIdx, slot, slot, type);
+        if(document.getElementById('staffingToggle').checked) renderStaffing();
+        saveState();
+      });
+
+      // Allow starting a paint by pressing the left mouse button on a palette item and dragging across tracks.
+      track.addEventListener('mousedown', (e) => {
+        // If user clicked on track but paintType is set (selected by palette click), start direct painting on that row.
+        if(e.button !== 0) return;
+        if(!paintType) return;
+        e.preventDefault();
+        isPainting = true;
+        paintAgentGlobal = globalIdx;
+        paintStartSlot = slotFromClientX(track, e.clientX);
+        paintRangeOnAgent(paintAgentGlobal, paintStartSlot, paintStartSlot, paintType);
       });
 
       row.appendChild(track);
       container.appendChild(row);
       rowTrackEls.push(track);
 
-      // render segments for this agent
+      // render initial segments
       renderRowSegmentsGlobalIndex(globalIdx);
-    }
+    });
 
     renderStaffing();
     updatePageInfo();
-    if (visibleAgentIndices.length === 0) {
+    if(visibleAgentIndices.length === 0){
       const noRes = document.createElement('div');
-      noRes.id = 'noResultsRow';
       noRes.className = 'no-results';
       noRes.textContent = 'No agents match "' + document.getElementById('searchInput').value.trim() + '"';
       container.appendChild(noRes);
     }
   }
 
-  function escapeHtml(s) {
-    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  }
+  function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  function applyFilterAndRebuild() {
+  // filter by search text across agent id, agency, lob
+  function applyFilterAndRebuild(){
     const q = document.getElementById('searchInput').value.trim().toLowerCase();
     visibleAgentIndices = [];
-    for (let i = 0; i < AGENT_COUNT; i++) {
-      const label = 'agent ' + pad3(i + 1);
+    for(let i=0;i<AGENT_COUNT;i++){
+      const label = 'agent ' + pad3(i+1);
       const agency = (agencyData[i] || '').toLowerCase();
       const lob = (lobData[i] || '').toLowerCase();
       const match = !q || label.includes(q) || agency.includes(q) || lob.includes(q);
-      if (match) visibleAgentIndices.push(i);
+      if(match) visibleAgentIndices.push(i);
     }
-    // clamp currentPage
     const totalPages = Math.max(1, Math.ceil(visibleAgentIndices.length / pageSize));
-    if (currentPage > totalPages) currentPage = totalPages;
+    if(currentPage > totalPages) currentPage = totalPages;
     buildGrid();
   }
 
-  function updatePageInfo() {
+  function updatePageInfo(){
     const totalPages = Math.max(1, Math.ceil(visibleAgentIndices.length / pageSize));
     document.getElementById('pageInfo').textContent = 'Page ' + currentPage + ' / ' + totalPages;
     document.getElementById('prevPageBtn').disabled = currentPage <= 1;
     document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
   }
 
-  function updateDateLabel() {
-    document.getElementById('dateLabel').textContent = formatDate(currentDate);
+  function updateDateLabel(){ document.getElementById('dateLabel').textContent = formatDate(currentDate); }
+
+  // global mousemove/up for painting from palette
+  function onDocumentMouseMove(e){
+    if(!isPainting || paintType == null) return;
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const track = el && (el.closest ? el.closest('.agent-track') : null);
+    if(!track) return;
+    const row = track.closest('.row');
+    if(!row) return;
+    const globalIdx = parseInt(row.dataset.agentIdxGlobal,10);
+    if(Number.isNaN(globalIdx)) return;
+    const slot = slotFromClientX(track, e.clientX);
+    if(paintStartSlot == null){
+      paintStartSlot = slot;
+      paintAgentGlobal = globalIdx;
+    }
+    // Only paint within the same row while dragging
+    if(globalIdx === paintAgentGlobal){
+      paintRangeOnAgent(globalIdx, paintStartSlot, slot, paintType);
+    }else{
+      // Optionally: move start to new row when dragging into different row
+      paintStartSlot = slot;
+      paintAgentGlobal = globalIdx;
+      paintRangeOnAgent(globalIdx, slot, slot, paintType);
+    }
+  }
+  function onDocumentMouseUp(e){
+    if(isPainting){
+      isPainting = false;
+      paintStartSlot = null;
+      paintAgentGlobal = null;
+      paintType = null;
+      saveState();
+      if(document.getElementById('staffingToggle').checked) renderStaffing();
+      // remove document-level listeners
+      document.removeEventListener('mousemove', onDocumentMouseMove);
+      document.removeEventListener('mouseup', onDocumentMouseUp);
+      // release any active palette "pressed" UI
+      document.querySelectorAll('.palette-item.pressed').forEach(i => i.classList.remove('pressed'));
+    }
   }
 
-  document.getElementById('searchInput').addEventListener('input', () => {
-    currentPage = 1;
-    applyFilterAndRebuild();
-  });
+  // palette rendering and interactions
+  function renderPalette(){
+    const container = document.getElementById('paletteItems');
+    container.innerHTML = '';
+    Object.entries(ACTIVITY_TYPES).forEach(([key, meta]) => {
+      const item = document.createElement('div');
+      item.className = 'palette-item';
+      item.draggable = true;
+      item.dataset.type = key;
+      item.innerHTML = '<span class="palette-icon" style="background:' + meta.color + '">' + svgIcon(meta.icon,14) + '</span><span class="palette-label">' + meta.label + '</span>';
 
-  document.getElementById('staffingToggle').addEventListener('change', (e) => {
-    document.getElementById('staffingRow').style.display = e.target.checked ? 'flex' : 'none';
-    if (e.target.checked) renderStaffing();
-  });
+      // HTML5 dragstart so user can drop to timeline (single slot or, combined with dragover, preview)
+      item.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', key);
+        e.dataTransfer.effectAllowed = 'copy';
+      });
 
-  document.getElementById('dayBtn').addEventListener('click', () => {
-    viewMode = 'Day';
-    document.getElementById('dayBtn').classList.add('active');
-    document.getElementById('weekBtn').classList.remove('active');
-  });
-  document.getElementById('weekBtn').addEventListener('click', () => {
-    viewMode = 'Week';
-    document.getElementById('weekBtn').classList.add('active');
-    document.getElementById('dayBtn').classList.remove('active');
-  });
+      // Click or mousedown: start paint mode
+      item.addEventListener('mousedown', (e) => {
+        if(e.button !== 0) return;
+        e.preventDefault();
+        paintType = key;
+        isPainting = true;
+        paintStartSlot = null;
+        paintAgentGlobal = null;
+        // visual pressed state
+        item.classList.add('pressed');
+        // attach document listeners
+        document.addEventListener('mousemove', onDocumentMouseMove);
+        document.addEventListener('mouseup', onDocumentMouseUp);
+      });
 
-  document.getElementById('prevDate').addEventListener('click', () => {
-    currentDate.setDate(currentDate.getDate() - (viewMode === 'Week' ? 7 : 1));
-    updateDateLabel();
-  });
-  document.getElementById('nextDate').addEventListener('click', () => {
-    currentDate.setDate(currentDate.getDate() + (viewMode === 'Week' ? 7 : 1));
-    updateDateLabel();
-  });
+      // if user releases mouse on the palette (mouseup), ensure we stop painting
+      item.addEventListener('mouseup', (e) => {
+        // handled by document mouseup; keep empty
+      });
 
-  document.getElementById('pageSizeSelect').addEventListener('change', (e) => {
-    pageSize = parseInt(e.target.value, 10);
-    currentPage = 1;
-    applyFilterAndRebuild();
-  });
-  document.getElementById('prevPageBtn').addEventListener('click', () => {
-    if (currentPage > 1) currentPage--;
-    buildGrid();
-  });
-  document.getElementById('nextPageBtn').addEventListener('click', () => {
-    const totalPages = Math.max(1, Math.ceil(visibleAgentIndices.length / pageSize));
-    if (currentPage < totalPages) currentPage++;
-    buildGrid();
-  });
+      container.appendChild(item);
+    });
+  }
 
+  // initialize visibleAgentIndices
+  function initVisibleAgents(){ visibleAgentIndices = []; for(let i=0;i<AGENT_COUNT;i++) visibleAgentIndices.push(i); }
+
+  // create hour labels once on header (done in buildGrid using buildHourLabels)
+
+  // clear all
   document.getElementById('clearAllBtn').addEventListener('click', () => {
-    if (!confirm('Clear all 200 agent schedules and metadata?')) return;
-    for (let i = 0; i < AGENT_COUNT; i++) {
+    if(!confirm('Clear all ' + AGENT_COUNT + ' agent schedules and metadata?')) return;
+    for(let i=0;i<AGENT_COUNT;i++){
       agentData[i] = new Array(SLOTS_PER_DAY).fill(null);
       agencyData[i] = '';
       lobData[i] = '';
     }
-    buildGrid();
+    saveState();
+    applyFilterAndRebuild();
     renderStaffing();
   });
 
+  // csv export includes Agency and LOB
   document.getElementById('downloadBtn').addEventListener('click', () => {
-    const header = ['Agent','Agency','LOB'].concat(Array.from({ length: SLOTS_PER_DAY }, (_, s) => slotToTime(s)));
+    const header = ['Agent','Agency','LOB'].concat(Array.from({length:SLOTS_PER_DAY},(_,s)=>slotToTime(s)));
     const rows = [header.join(',')];
-    for (let i = 0; i < AGENT_COUNT; i++) {
-      const line = ['Agent ' + pad3(i + 1), agencyData[i] || '', lobData[i] || ''].concat(agentData[i].map(t => t ? ACTIVITY_TYPES[t].label : ''));
-      rows.push(line.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(','));
+    for(let i=0;i<AGENT_COUNT;i++){
+      const line = ['Agent ' + pad3(i+1), agencyData[i] || '', lobData[i] || ''].concat(agentData[i].map(t => t ? ACTIVITY_TYPES[t].label : ''));
+      rows.push(line.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(','));
     }
     const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'kiran_schedule_' + formatDate(currentDate).replace(/\//g, '-') + '.csv';
+    a.download = 'kiran_schedule_' + formatDate(currentDate).replace(/\//g,'-') + '.csv';
     a.click();
     URL.revokeObjectURL(url);
   });
 
+  // search box filters across Agent/Agency/LOB
+  document.getElementById('searchInput').addEventListener('input', () => { currentPage = 1; applyFilterAndRebuild(); });
 
-  // initial setup: all visible initially
-  function initPaginationDefaults() {
-    visibleAgentIndices = [];
-    for (let i = 0; i < AGENT_COUNT; i++) visibleAgentIndices.push(i);
+  // staffing toggle
+  document.getElementById('staffingToggle').addEventListener('change', (e) => {
+    document.getElementById('staffingRow').style.display = e.target.checked ? 'flex' : 'none';
+    if(e.target.checked) renderStaffing();
+  });
+
+  // day/week toggle
+  document.getElementById('dayBtn').addEventListener('click', () => { viewMode = 'Day'; document.getElementById('dayBtn').classList.add('active'); document.getElementById('weekBtn').classList.remove('active'); });
+  document.getElementById('weekBtn').addEventListener('click', () => { viewMode = 'Week'; document.getElementById('weekBtn').classList.add('active'); document.getElementById('dayBtn').classList.remove('active'); });
+
+  // date nav
+  document.getElementById('prevDate').addEventListener('click', () => { currentDate.setDate(currentDate.getDate() - (viewMode === 'Week' ? 7 : 1)); updateDateLabel(); saveState(); });
+  document.getElementById('nextDate').addEventListener('click', () => { currentDate.setDate(currentDate.getDate() + (viewMode === 'Week' ? 7 : 1)); updateDateLabel(); saveState(); });
+
+  // page size and paging
+  document.getElementById('pageSizeSelect').addEventListener('change', (e) => { pageSize = parseInt(e.target.value,10); currentPage = 1; saveState(); applyFilterAndRebuild(); });
+  document.getElementById('prevPageBtn').addEventListener('click', () => { if(currentPage>1) currentPage--; buildGrid(); });
+  document.getElementById('nextPageBtn').addEventListener('click', () => { const totalPages = Math.max(1, Math.ceil(visibleAgentIndices.length / pageSize)); if(currentPage < totalPages) currentPage++; buildGrid(); });
+
+  // on mouseup anywhere, stop painting (safety)
+  document.addEventListener('mouseup', () => {
+    if(isPainting){
+      isPainting = false;
+      paintType = null;
+      paintStartSlot = null;
+      paintAgentGlobal = null;
+      saveState();
+      document.removeEventListener('mousemove', onDocumentMouseMove);
+      document.removeEventListener('mouseup', onDocumentMouseUp);
+      document.querySelectorAll('.palette-item.pressed').forEach(i => i.classList.remove('pressed'));
+    }
+  });
+
+  // escape key cancels paint
+  document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && isPainting){ isPainting = false; paintType = null; paintStartSlot = null; paintAgentGlobal = null; document.removeEventListener('mousemove', onDocumentMouseMove); document.removeEventListener('mouseup', onDocumentMouseUp); document.querySelectorAll('.palette-item.pressed').forEach(i => i.classList.remove('pressed')); } });
+
+  // save on unload
+  window.addEventListener('beforeunload', saveState);
+
+  // initial setup
+  function init(){
+    loadState();
+    renderPalette();
+    initVisibleAgents();
+    applyFilterAndRebuild();
+    updateDateLabel();
+    // small UX: clicking a palette item toggles pressed state
+    document.getElementById('paletteItems').addEventListener('click', (e) => {
+      const p = e.target.closest('.palette-item');
+      if(!p) return;
+      // toggle selection
+      document.querySelectorAll('.palette-item').forEach(i => i.classList.remove('pressed'));
+      p.classList.add('pressed');
+      // set paintType to selected but do not start painting until mousedown/drag
+      paintType = p.dataset.type;
+    });
   }
 
-  renderPalette();
-  initPaginationDefaults();
-  buildGrid();
-  updateDateLabel();
+  function initVisibleAgents(){ visibleAgentIndices = []; for(let i=0;i<AGENT_COUNT;i++) visibleAgentIndices.push(i); }
+
+  // utility: find element by selector within current page rows
+  function findRowElementForGlobalIdx(idx){
+    const pos = pageAgentIndices.indexOf(idx);
+    if(pos === -1) return null;
+    return rowTrackEls[pos];
+  }
+
+  // initial run
+  init();
 
 })();
 </script>
-
 </body>
 </html>
