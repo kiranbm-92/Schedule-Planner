@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KIRAN BM — Schedule Planner</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: rgba(30,41,59,0.6);
+    --card-solid: #1e293b;
+    --border: rgba(51,65,85,0.6);
+    --border-strong: #334155;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --text-faint: #64748b;
+    --sky: #38bdf8;
+    --rose: #f43f5e;
+    --emerald: #34d399;
+    --amber: #f59e0b;
+
+    --c-phone: #3b82f6;
+    --c-chat: #22c55e;
+    --c-email: #f97316;
+    --c-meeting: #a855f7;
+    --c-break: #22d3ee;
+    --c-lunch: #eab308;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: 1.25rem;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .page-header h1 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .page-header h1 span { color: var(--text-faint); font-size: 0.75rem; font-weight: 400; }
+
+  .icon-btn {
+    background: var(--card-solid);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: 0.5rem;
+    padding: 0.45rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .icon-btn:hover { background: #334155; }
+
+  /* Toolbar */
+  .toolbar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 0.65rem;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: #334155;
+    color: #e2e8f0;
+    font-size: 0.72rem;
+    padding: 0.35rem 0.6rem;
+    border-radius: 999px;
+  }
+  .chip button {
+    background: none;
+    border: none;
+    color: var(--text-faint);
+    cursor: pointer;
+    font-size: 0.75rem;
+    line-height: 1;
+    padding: 0;
+  }
+  .chip button:hover { color: var(--rose); }
+  .chip-more { color: var(--text-faint); font-size: 0.72rem; padding: 0.35rem 0.4rem; }
+
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    border-radius: 0.5rem;
+    padding: 0.35rem 0.6rem;
+    margin-left: 0.15rem;
+  }
+  .search-box svg { flex-shrink: 0; color: var(--text-faint); }
+  .search-box input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-size: 0.72rem;
+    width: 130px;
+  }
+  .search-box input::placeholder { color: var(--text-faint); }
+
+  .date-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    margin-left: auto;
+  }
+  .date-nav button {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 0.3rem;
+    border-radius: 0.4rem;
+    display: inline-flex;
+  }
+  .date-nav button:hover { background: #334155; }
+  .date-nav span {
+    font-family: ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: #e2e8f0;
+    padding: 0 0.4rem;
+  }
+
+  .view-toggle {
+    display: flex;
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    font-size: 0.72rem;
+    font-weight: 500;
+  }
+  .view-toggle button {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    padding: 0.4rem 0.75rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .view-toggle button:hover { background: #1e293b; }
+  .view-toggle button.active { background: var(--rose); color: #fff; }
+
+  .staffing-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.72rem;
+    color: #e2e8f0;
+    cursor: pointer;
+    user-select: none;
+  }
+  .staffing-toggle input { accent-color: var(--sky); }
+
+  .toolbar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: none;
+    border: none;
+    color: #e2e8f0;
+    font-size: 0.72rem;
+    padding: 0.35rem 0.55rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+  }
+  .toolbar-btn:hover { background: #334155; }
+
+  /* Grid */
+  .grid-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    overflow: hidden;
+  }
+  .grid-scroll { overflow-x: auto; }
+  .grid-inner { min-width: 900px; }
+
+  .row {
+    display: flex;
+    border-bottom: 1px solid #1e293b;
+  }
+  .row:hover { background: rgba(51,65,85,0.2); }
+
+  .name-col {
+    width: 12rem;
+    flex-shrink: 0;
+    padding: 0.6rem 0.75rem;
+    border-right: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .timeline-header {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: rgba(15,23,42,0.6);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+  .timeline-header .name-col {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .timeline-header-track {
+    position: relative;
+    flex: 1;
+    height: 2rem;
+  }
+  .hour-label {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    font-size: 0.62rem;
+    font-family: ui-monospace, monospace;
+    color: var(--text-faint);
+    border-left: 1px solid #1e293b;
+    padding: 0.4rem 0 0 0.25rem;
+  }
+
+  .staffing-row .name-col {
+    font-size: 0.68rem;
+    color: var(--text-faint);
+    border-right: 1px solid var(--border);
+  }
+  .staffing-row {
+    background: rgba(15,23,42,0.3);
+  }
+  .staffing-track {
+    position: relative;
+    flex: 1;
+    height: 2.5rem;
+    display: flex;
+    align-items: flex-end;
+  }
+  .staffing-bar {
+    flex: 1;
+    background: rgba(56,189,248,0.5);
+    margin: 0 0.5px;
+    border-radius: 1px 1px 0 0;
+  }
+
+  .avatar {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 999px;
+    background: rgba(56,189,248,0.2);
+    color: var(--sky);
+    font-size: 0.6rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .agent-name {
+    font-size: 0.72rem;
+    color: #e2e8f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .status-dot {
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 999px;
+    background: var(--emerald);
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .agent-track {
+    position: relative;
+    flex: 1;
+    padding: 0.6rem 0;
+  }
+  .gridline {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-left: 1px solid #1e293b;
+  }
+  .segment {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 1.5rem;
+    border-radius: 0.2rem;
+  }
+  .unavailable {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 1.5rem;
+    border-radius: 0.35rem;
+    border: 1px solid rgba(245,158,11,0.5);
+    background-image: repeating-linear-gradient(45deg, rgba(245,158,11,0.25) 0, rgba(245,158,11,0.25) 4px, transparent 4px, transparent 9px);
+  }
+
+  .no-results {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-faint);
+    padding: 2.5rem 0;
+  }
+
+  /* Legend */
+  .legend {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+  }
+  .legend-item { display: flex; align-items: center; gap: 0.4rem; }
+  .legend-swatch { width: 0.7rem; height: 0.7rem; border-radius: 0.15rem; }
+  .legend-label { font-size: 0.72rem; color: var(--text-dim); }
+</style>
+</head>
+<body>
+
+  <div class="page-header">
+    <h1>Schedules <span>&#9432;</span></h1>
+    <div style="display:flex; gap:0.5rem;">
+      <button class="icon-btn" title="Settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+      <button class="icon-btn" title="Download">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="toolbar" id="toolbar">
+    <!-- filter chips injected by JS -->
+    <div class="search-box">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="searchInput" type="text" placeholder="Search agents...">
+    </div>
+
+    <div class="date-nav">
+      <button id="prevDate">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span id="dateLabel"></span>
+      <button id="nextDate">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+
+    <div class="view-toggle">
+      <button id="dayBtn" class="active">Day</button>
+      <button id="weekBtn">Week</button>
+    </div>
+
+    <label class="staffing-toggle">
+      <input type="checkbox" id="staffingToggle" checked>
+      Show staffing
+    </label>
+
+    <button class="toolbar-btn">
+      Filter
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <button class="toolbar-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      Locations
+    </button>
+  </div>
+
+  <div class="grid-card">
+    <div class="grid-scroll">
+      <div class="grid-inner" id="gridInner"></div>
+    </div>
+  </div>
+
+  <div class="legend" id="legend"></div>
+
+<script>
+(function () {
+  // ---- Config ----
+  const TIMELINE_START_HOUR = 6;   // 6:00 AM
+  const TIMELINE_END_HOUR = 21;    // 9:00 PM
+  const TOTAL_MINUTES = (TIMELINE_END_HOUR - TIMELINE_START_HOUR) * 60;
+
+  const SEGMENT_TYPES = {
+    phone:   { label: 'Phone / Voice',      color: 'var(--c-phone)' },
+    chat:    { label: 'Chat / Digital',     color: 'var(--c-chat)' },
+    email:   { label: 'Email / Admin',      color: 'var(--c-email)' },
+    meeting: { label: 'Meeting / Training', color: 'var(--c-meeting)' },
+    break:   { label: 'Break',              color: 'var(--c-break)' },
+    lunch:   { label: 'Lunch',              color: 'var(--c-lunch)' },
+  };
+
+  const AGENT_NAMES = [
+    "Mathieu Steinman", "Ashley Ambam", "Beattie Bakker", "Blake Backus",
+    "David Evans", "Sven Klocker", "John Smith", "Steve Beether",
+    "Amelio Armstrong", "Alistair Andrews", "Bella Baker", "Ed Creasey",
+    "Robert Nyberg", "Bill Betsford", "Aaron Able", "Florian Garnier",
+    "Matt Kreutik", "Nick Blanchet", "Shane Johnson", "Juancho Banaag",
+    "Mary LaFosse", "Nicole Price"
+  ];
+
+  let filters = ["Cloud", "EMEA", "North America"];
+  let viewMode = "Day";
+  let currentDate = new Date();
+
+  // ---- Helpers ----
+  const formatHour = (h) => {
+    const period = h >= 12 ? 'PM' : 'AM';
+    let hr = h % 12;
+    if (hr === 0) hr = 12;
+    return hr + ':00' + period;
+  };
+
+  const initialsOf = (name) => name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+
+  const minutesToPct = (mins) => (mins / TOTAL_MINUTES) * 100;
+
+  const seededRandom = (seed) => {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  };
+
+  const formatDate = (d) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return y + '/' + m + '/' + day;
+  };
+
+  // ---- Build sample schedule (deterministic, cascading shift starts) ----
+  function generateSchedule() {
+    return AGENT_NAMES.map((name, idx) => {
+      const rand = seededRandom(idx * 7.13);
+      const onLeave = idx === 19; // one agent shown as unavailable
+      const startOffsetMin = Math.round(idx * 18 + rand * 20);
+      const startMin = Math.min(startOffsetMin, TOTAL_MINUTES - 480);
+      const shiftLenMin = 480 + Math.round(rand * 60);
+
+      if (onLeave) {
+        return { name, initials: initialsOf(name), onLeave: true, segments: [] };
+      }
+
+      const segments = [];
+      let remaining = shiftLenMin;
+      let cursor = startMin;
+
+      const push = (type, len) => {
+        len = Math.min(len, remaining);
+        if (len <= 0) return;
+        segments.push({ type, start: cursor, end: cursor + len });
+        cursor += len;
+        remaining -= len;
+      };
+
+      push('phone', 105 + Math.round(rand * 30));
+      push('break', 15);
+      push('phone', 90 + Math.round(rand * 20));
+      push('chat', 60 + Math.round(rand * 25));
+      push('lunch', 30);
+      push('email', 45 + Math.round(rand * 20));
+      push('chat', 60);
+      push('meeting', 30 + Math.round(rand * 15));
+      push('phone', remaining);
+
+      return { name, initials: initialsOf(name), onLeave: false, segments };
+    });
+  }
+
+  function computeStaffingCurve(schedule) {
+    const slots = TOTAL_MINUTES / 15;
+    const counts = new Array(slots).fill(0);
+    schedule.forEach(agent => {
+      if (agent.onLeave) return;
+      agent.segments.forEach(seg => {
+        if (seg.type === 'break' || seg.type === 'lunch') return;
+        const startSlot = Math.floor(seg.start / 15);
+        const endSlot = Math.ceil(seg.end / 15);
+        for (let s = startSlot; s < endSlot && s < slots; s++) counts[s]++;
+      });
+    });
+    return counts;
+  }
+
+  const schedule = generateSchedule();
+  const staffingCurve = computeStaffingCurve(schedule);
+  const maxStaffing = Math.max(1, ...staffingCurve);
+
+  // ---- Render: toolbar filter chips ----
+  function renderChips() {
+    const toolbar = document.getElementById('toolbar');
+    // remove old chips
+    toolbar.querySelectorAll('.chip, .chip-more').forEach(el => el.remove());
+
+    const frag = document.createDocumentFragment();
+    filters.forEach(f => {
+      const chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.innerHTML = f + ' <button data-filter="' + f + '">&times;</button>';
+      frag.appendChild(chip);
+    });
+    if (filters.length < 4) {
+      const more = document.createElement('span');
+      more.className = 'chip-more';
+      more.textContent = '+' + (4 - filters.length);
+      frag.appendChild(more);
+    }
+    toolbar.insertBefore(frag, toolbar.firstChild);
+
+    toolbar.querySelectorAll('.chip button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        filters = filters.filter(f => f !== btn.dataset.filter);
+        renderChips();
+      });
+    });
+  }
+
+  // ---- Render: hour markers (shared by header + rows) ----
+  function hourMarkers() {
+    const arr = [];
+    for (let h = TIMELINE_START_HOUR; h <= TIMELINE_END_HOUR; h++) arr.push(h);
+    return arr;
+  }
+
+  // ---- Render: full grid ----
+  function renderGrid() {
+    const container = document.getElementById('gridInner');
+    container.innerHTML = '';
+
+    const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
+    const filtered = searchVal
+      ? schedule.filter(a => a.name.toLowerCase().includes(searchVal))
+      : schedule;
+
+    const showStaffing = document.getElementById('staffingToggle').checked;
+
+    // Timeline header
+    const header = document.createElement('div');
+    header.className = 'timeline-header';
+    header.innerHTML = '<div class="name-col">Name</div><div class="timeline-header-track"></div>';
+    const headerTrack = header.querySelector('.timeline-header-track');
+    hourMarkers().forEach(h => {
+      const lbl = document.createElement('div');
+      lbl.className = 'hour-label';
+      lbl.style.left = minutesToPct((h - TIMELINE_START_HOUR) * 60) + '%';
+      lbl.textContent = formatHour(h);
+      headerTrack.appendChild(lbl);
+    });
+    container.appendChild(header);
+
+    // Staffing overlay
+    if (showStaffing) {
+      const srow = document.createElement('div');
+      srow.className = 'row staffing-row';
+      srow.innerHTML = '<div class="name-col">Staffing</div><div class="staffing-track"></div>';
+      const strack = srow.querySelector('.staffing-track');
+      staffingCurve.forEach(count => {
+        const bar = document.createElement('div');
+        bar.className = 'staffing-bar';
+        bar.style.height = ((count / maxStaffing) * 100) + '%';
+        bar.title = count + ' agents scheduled';
+        strack.appendChild(bar);
+      });
+      container.appendChild(srow);
+    }
+
+    // Agent rows
+    if (filtered.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'no-results';
+      empty.textContent = 'No agents match "' + searchVal + '"';
+      container.appendChild(empty);
+    }
+
+    filtered.forEach(agent => {
+      const row = document.createElement('div');
+      row.className = 'row';
+
+      const nameCol = document.createElement('div');
+      nameCol.className = 'name-col';
+      nameCol.innerHTML =
+        '<span class="avatar">' + agent.initials + '</span>' +
+        '<span class="agent-name">' + agent.name + '</span>' +
+        '<span class="status-dot"></span>';
+      row.appendChild(nameCol);
+
+      const track = document.createElement('div');
+      track.className = 'agent-track';
+
+      hourMarkers().forEach(h => {
+        const gl = document.createElement('div');
+        gl.className = 'gridline';
+        gl.style.left = minutesToPct((h - TIMELINE_START_HOUR) * 60) + '%';
+        track.appendChild(gl);
+      });
+
+      if (agent.onLeave) {
+        const un = document.createElement('div');
+        un.className = 'unavailable';
+        un.style.left = '0%';
+        un.style.width = '100%';
+        un.title = 'Unavailable';
+        track.appendChild(un);
+      } else {
+        agent.segments.forEach(seg => {
+          const s = document.createElement('div');
+          s.className = 'segment';
+          s.style.left = minutesToPct(seg.start) + '%';
+          s.style.width = minutesToPct(seg.end - seg.start) + '%';
+          s.style.backgroundColor = SEGMENT_TYPES[seg.type].color;
+          s.title = SEGMENT_TYPES[seg.type].label;
+          track.appendChild(s);
+        });
+      }
+
+      row.appendChild(track);
+      container.appendChild(row);
+    });
+  }
+
+  // ---- Render: legend ----
+  function renderLegend() {
+    const legend = document.getElementById('legend');
+    legend.innerHTML = '';
+    Object.values(SEGMENT_TYPES).forEach(v => {
+      const item = document.createElement('div');
+      item.className = 'legend-item';
+      item.innerHTML =
+        '<span class="legend-swatch" style="background:' + v.color + '"></span>' +
+        '<span class="legend-label">' + v.label + '</span>';
+      legend.appendChild(item);
+    });
+    const un = document.createElement('div');
+    un.className = 'legend-item';
+    un.innerHTML =
+      '<span class="legend-swatch" style="border:1px solid rgba(245,158,11,0.6); background-image: repeating-linear-gradient(45deg, rgba(245,158,11,0.4) 0, rgba(245,158,11,0.4) 3px, transparent 3px, transparent 6px);"></span>' +
+      '<span class="legend-label">Unavailable</span>';
+    legend.appendChild(un);
+  }
+
+  function updateDateLabel() {
+    document.getElementById('dateLabel').textContent = formatDate(currentDate);
+  }
+
+  // ---- Wire up events ----
+  document.getElementById('searchInput').addEventListener('input', renderGrid);
+  document.getElementById('staffingToggle').addEventListener('change', renderGrid);
+
+  document.getElementById('dayBtn').addEventListener('click', () => {
+    viewMode = 'Day';
+    document.getElementById('dayBtn').classList.add('active');
+    document.getElementById('weekBtn').classList.remove('active');
+  });
+  document.getElementById('weekBtn').addEventListener('click', () => {
+    viewMode = 'Week';
+    document.getElementById('weekBtn').classList.add('active');
+    document.getElementById('dayBtn').classList.remove('active');
+  });
+
+  document.getElementById('prevDate').addEventListener('click', () => {
+    currentDate.setDate(currentDate.getDate() - (viewMode === 'Week' ? 7 : 1));
+    updateDateLabel();
+  });
+  document.getElementById('nextDate').addEventListener('click', () => {
+    currentDate.setDate(currentDate.getDate() + (viewMode === 'Week' ? 7 : 1));
+    updateDateLabel();
+  });
+
+  // ---- Init ----
+  renderChips();
+  renderGrid();
+  renderLegend();
+  updateDateLabel();
+})();
+</script>
+
+</body>
+</html>
